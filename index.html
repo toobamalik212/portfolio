@@ -199,6 +199,14 @@ section{padding:var(--space-96) var(--gutter);position:relative}
 .compact .mediarow{gap:var(--space-8)}
 .compact .media{height:170px}
 
+/* ---------- Project stack: each card sticks, the next slides over it, the one beneath folds back ---------- */
+.projects.stacked{perspective:1600px;perspective-origin:50% 0}
+.stack-item{position:sticky;transform-origin:50% 0;will-change:transform}
+.stack-item > .card,.stack-item > .compact-row{position:relative}
+.stack-item:not(:first-child) > .card,.stack-item:not(:first-child) .compact{box-shadow:0 -28px 56px -20px rgba(0,0,0,.9)}
+.stack-item:has(> .compact-row){background:var(--bg);border-radius:var(--radius-hero)}
+.fold-shade{position:absolute;inset:0;border-radius:var(--radius-hero);background:var(--bg);opacity:0;pointer-events:none;z-index:2}
+
 /* ---------- Experience ---------- */
 .timeline{display:flex;flex-direction:column}
 .row{display:flex;gap:var(--space-32);align-items:flex-start;padding:var(--space-24) var(--space-16);border-top:1px solid var(--divider);position:relative;overflow:hidden;isolation:isolate}
@@ -630,6 +638,37 @@ section{padding:var(--space-96) var(--gutter);position:relative}
     });
   });
 
+  /* ---------- Project stack ---------- */
+  const proj = $('.projects'), stack = [];
+  if (!reduce) {
+    proj.classList.add('stacked');
+    [...proj.children].forEach((el, i) => {
+      const w = document.createElement('div'); w.className = 'stack-item'; w.style.zIndex = i + 1;
+      el.before(w); w.appendChild(el);
+      const sh = document.createElement('div'); sh.className = 'fold-shade'; w.appendChild(sh);
+      stack.push({ w, sh, top: 0, h: 0 });
+    });
+    // Each card sticks just under the nav, a little lower than the one before so the deck shows.
+    // A card taller than the screen sticks only once its bottom is in view, so nothing is skipped.
+    const layoutStack = () => stack.forEach((it, i) => {
+      it.h = it.w.offsetHeight;
+      it.top = Math.min(96 + i * 14, innerHeight - it.h - 24);
+      it.w.style.top = it.top + 'px';
+    });
+    layoutStack(); addEventListener('resize', layoutStack);
+    if ('ResizeObserver' in window) { const ro = new ResizeObserver(layoutStack); stack.forEach((it) => ro.observe(it.w)); }
+  }
+  function foldStack() {
+    for (let i = 0; i < stack.length - 1; i++) {
+      const cur = stack[i], next = stack[i + 1];
+      const nt = next.w.getBoundingClientRect().top;
+      const p = Math.min(1, Math.max(0, (innerHeight - nt) / Math.max(1, innerHeight - next.top)));
+      const e = p * p * (3 - 2 * p); // smooth start and settle
+      cur.w.style.transform = e ? `scale(${(1 - 0.07 * e).toFixed(4)}) rotateX(${(9 * e).toFixed(2)}deg)` : '';
+      cur.sh.style.opacity = (0.6 * e).toFixed(3);
+    }
+  }
+
   /* ---------- Values: fill grows from where the pointer enters ---------- */
   $$('.value').forEach((v) => v.addEventListener('pointerenter', (e) => {
     const r = v.getBoundingClientRect();
@@ -678,6 +717,7 @@ section{padding:var(--space-96) var(--gutter);position:relative}
     nav.classList.toggle('scrolled', y > 8);
     let act = 'hero'; spyIds.forEach((id) => { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top < innerHeight * .4) act = id; });
     if (!$('.link.active') || $('.link.active').getAttribute('href') !== '#' + act) setActive(act);
+    if (stack.length) foldStack();
     const qr = q.getBoundingClientRect(), qp = Math.min(1, Math.max(0, (innerHeight * .85 - qr.top) / (qr.height + innerHeight * .35)));
     words.forEach((w, i) => w.classList.toggle('lit', reduce || i / words.length < qp));
     if (!reduce) {
