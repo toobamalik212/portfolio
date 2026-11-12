@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tooba Malik — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Source+Code+Pro:wght@400&display=swap" rel="stylesheet">
+<style>
+/* ---------- Tokens (from the Figma file's variables) ---------- */
+:root{
+  --bg:#0a0a0a; --surface:#101010; --surface-2:#161616; --border:#1f1f1f; --divider:#262626;
+  --text:#ffffff; --text-soft:#dcdcdc; --text-muted:#9e9e9e; --accent:#ee2737; --on-accent:#ffffff;
+  --space-4:4px; --space-8:8px; --space-12:12px; --space-16:16px; --space-24:24px; --space-32:32px;
+  --space-48:48px; --space-72:72px; --space-96:96px; --space-148:148px;
+  --radius-tag:6px; --radius-stat:14px; --radius-card:18px; --radius-hero:22px; --radius-pill:999px;
+  --gutter:clamp(20px, 10.3vw, var(--space-148));
+  --font:'Inter', system-ui, sans-serif; --mono:'Source Code Pro', ui-monospace, monospace;
+  /* Motion identity: one signature curve, one playful curve, three durations */
+  --ease:cubic-bezier(0.2,0,0,1); --ease-soft:cubic-bezier(0.4,0,0.2,1); --ease-pop:cubic-bezier(0.175,0.885,0.32,1.275); --ease-in:cubic-bezier(0.3,0,1,1);
+  --d-quick:150ms; --d-std:300ms; --d-slow:600ms;
+  --d-enter:1000ms; /* entrance reveals */ --stagger:110ms;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;background:var(--bg)}
+body{background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img{display:block}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+/* ---------- Type styles ---------- */
+.eyebrow{font-family:var(--mono);font-size:12px;line-height:1.3;letter-spacing:.72px;text-transform:uppercase;color:var(--text-muted)}
+.h-section{font-weight:600;font-size:40px;line-height:1.15;letter-spacing:-1px}
+.h-card{font-weight:500;font-size:24px;line-height:1.25;letter-spacing:-.5px}
+.h-small{font-weight:600;font-size:20px;line-height:1.3;letter-spacing:-.3px}
+.body{font-size:16px;line-height:1.5;color:var(--text-soft)}
+.body-s{font-size:14px;line-height:1.5;color:var(--text-muted)}
+.body-l{font-size:18px;line-height:1.6;color:var(--text-soft)}
+
+/* ---------- Ambient + chrome ---------- */
+.progress{position:fixed;left:0;top:0;height:2px;width:100%;background:var(--accent);transform-origin:0 50%;transform:scaleX(0);z-index:60}
+.grain{position:fixed;inset:-50%;pointer-events:none;z-index:1;opacity:.05;
+  background-image:radial-gradient(rgba(255,255,255,.6) 1px, transparent 1px);background-size:3px 3px;animation:grain 1.2s steps(4) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-1%,1%)}50%{transform:translate(1%,-1%)}75%{transform:translate(-1%,-1%)}}
+.blob{position:absolute;width:520px;height:520px;border-radius:50%;filter:blur(90px);opacity:.16;background:var(--accent);pointer-events:none;
+  top:40px;right:-160px;animation:drift 14s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(-120px,80px) scale(1.15)}}
+
+.cursor{position:fixed;left:0;top:0;width:10px;height:10px;border-radius:50%;background:var(--accent);pointer-events:none;z-index:80;
+  transform:translate(-50%,-50%);transition:width var(--d-std) var(--ease-pop),height var(--d-std) var(--ease-pop),background var(--d-std) var(--ease),opacity var(--d-std);mix-blend-mode:difference;opacity:0}
+.cursor.on{opacity:1}
+.cursor.big{width:44px;height:44px;background:#fff}
+@media (pointer:coarse){.cursor{display:none}}
+
+/* ---------- Nav ---------- */
+.nav{position:fixed;top:0;left:0;right:0;height:72px;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:0 var(--gutter);
+  background:color-mix(in srgb, var(--bg) 82%, transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--divider);
+  transition:transform 400ms var(--ease)}
+/* Nav stays pinned; once the page scrolls it gains a soft shadow so it reads as floating above content */
+.nav{transition:box-shadow 400ms var(--ease-soft),background 400ms var(--ease-soft)}
+.nav.scrolled{background:color-mix(in srgb, var(--bg) 92%, transparent);box-shadow:0 8px 24px -12px rgba(0,0,0,.9)}
+.logo{display:block;height:22px;width:216px;position:relative}
+.logo img{width:216px;height:22px}
+.logo .fallback{font-weight:600;font-size:18px;letter-spacing:-.4px;line-height:22px}
+.logo:hover img,.logo:hover .fallback{animation:wobble 500ms var(--ease)}
+@keyframes wobble{20%{transform:rotate(-3deg)}45%{transform:rotate(2deg)}70%{transform:rotate(-1deg)}100%{transform:rotate(0)}}
+.links{position:relative;display:flex;gap:var(--space-8)}
+.pill{position:absolute;top:0;left:0;height:100%;background:var(--surface-2);border-radius:var(--radius-pill);z-index:0;
+  transition:transform 450ms var(--ease-pop),width 450ms var(--ease-pop)}
+.link{position:relative;z-index:1;display:flex;align-items:center;gap:var(--space-8);padding:var(--space-8) var(--space-16);border-radius:var(--radius-pill);
+  font-weight:500;font-size:14px;line-height:1.3;text-transform:lowercase;color:var(--text-muted);transition:color var(--d-quick) var(--ease)}
+.link:hover{color:var(--text)}
+.link .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);transform:scale(0);margin-right:-14px;transition:transform var(--d-std) var(--ease-pop),margin var(--d-std) var(--ease)}
+.link.active{color:var(--text)}
+.link.active .dot{transform:scale(1);margin-right:0}
+
+/* ---------- Layout ---------- */
+main{position:relative;z-index:2}
+section{padding:var(--space-96) var(--gutter);position:relative}
+.stack{display:flex;flex-direction:column;gap:var(--space-32)}
+.label{display:flex;flex-direction:column;gap:var(--space-12)}
+.label .rule{height:1px;background:var(--divider);transform-origin:0 50%;transform:scaleX(0);transition:transform 1400ms var(--ease)}
+.label.in .rule{transform:scaleX(1)}
+
+/* Reveal on scroll: rise + fade, decelerating */
+.rv{opacity:0;transform:translateY(32px);transition:opacity var(--d-enter) var(--ease-soft),transform calc(var(--d-enter) * 1.15) var(--ease-soft)}
+/* Hero copy follows the name instead of arriving with it */
+.hero .body.rv{transition-delay:700ms}.hero .avail.rv{transition-delay:950ms}
+.rv.in{opacity:1;transform:none}
+
+/* ---------- Hero ---------- */
+.hero{padding-top:var(--space-148);padding-bottom:var(--space-96);overflow:hidden}
+.hero-top{display:flex;gap:var(--space-72);align-items:stretch}
+.intro{flex:1;min-width:0;display:flex;flex-direction:column;gap:32px}
+.intro{container-type:inline-size}
+/* Always one line: 96px as designed, scaling down only when the column is too narrow to hold it */
+.name{font-weight:500;font-size:min(96px, 17.5cqi);line-height:1;letter-spacing:-.04em;display:flex;flex-wrap:nowrap;white-space:nowrap;cursor:default}
+.name .ch{display:inline-block;transform:translateY(110%) rotate(8deg);opacity:0;will-change:transform}
+.name.go .ch{animation:rise 1100ms var(--ease-pop) forwards;animation-delay:calc(var(--i) * 65ms + 200ms)}
+@keyframes rise{to{transform:none;opacity:1}}
+.name .ch.boing{animation:boing 600ms var(--ease) forwards}
+@keyframes boing{0%{transform:none}25%{transform:translateY(-18px) scale(1.08,.92);color:var(--accent)}55%{transform:translateY(3px) scale(.96,1.05)}80%{transform:translateY(-2px)}100%{transform:none;color:var(--text)}}
+.name .sp{width:.28em}
+.eyebrow.typing::after{content:'_';color:var(--accent);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.hero .body p+p{margin-top:24px}
+.avail{display:flex;align-items:center;gap:10px;font-size:14px;line-height:1.5;color:var(--text-soft)}
+.status{position:relative;width:20px;height:20px;display:grid;place-items:center}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:dim 1.8s var(--ease) infinite}
+.status::before{content:'';position:absolute;inset:4px;border-radius:50%;border:1.5px solid var(--accent);animation:ring 1.8s var(--ease) infinite}
+@keyframes ring{0%,55%{transform:scale(.6);opacity:1}100%{transform:scale(1.9);opacity:0}}
+@keyframes dim{0%,55%{opacity:1}80%{opacity:.45}100%{opacity:1}}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{display:inline-flex;padding:var(--space-4) var(--space-8);border:.5px solid var(--accent);border-radius:var(--radius-tag);
+  font-family:var(--mono);font-size:12px;line-height:1.3;letter-spacing:.72px;text-transform:uppercase;color:var(--text);
+  cursor:default;user-select:none}
+/* Tags are read-only labels: no hover state */
+.tags.pop .tag{opacity:0;transform:scale(.6)}
+.tags.pop.in .tag{animation:popin 700ms var(--ease-pop) forwards;animation-delay:calc(var(--i) * var(--stagger) + 1200ms)}
+@keyframes popin{to{opacity:1;transform:none}}
+
+.portrait{width:480px;flex-shrink:0;border:1px solid var(--border);border-radius:var(--radius-card);overflow:hidden;position:relative;
+  min-height:420px;transform-style:preserve-3d;transition:transform 500ms var(--ease);will-change:transform;
+  opacity:0;clip-path:inset(100% 0 0 0 round 18px)}
+.portrait.in{animation:wipe 1500ms var(--ease) 400ms forwards}
+@keyframes wipe{to{opacity:1;clip-path:inset(0 0 0 0 round 18px)}}
+.portrait .media{position:absolute;inset:0;border:0;border-radius:0}
+.portrait .glare{position:absolute;inset:0;pointer-events:none;background:radial-gradient(400px circle at var(--gx,50%) var(--gy,50%), rgba(255,255,255,.12), transparent 60%);opacity:0;transition:opacity var(--d-std)}
+.portrait:hover .glare{opacity:1}
+
+/* ---------- Media slots (image or on-system placeholder) ---------- */
+.media{position:relative;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius-card);background:var(--surface-2)}
+.media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top left;transform:scale(1.06);transition:transform 1600ms var(--ease)}
+.media.ok img{transform:scale(1)}
+/* Loaded images size the slot to their own shape, so nothing is cropped.
+   Each item grows in proportion to its aspect ratio, which keeps a row's heights equal. */
+.mediarow .media.ok{height:auto !important;flex:var(--ar) 1 0 !important;min-width:0;aspect-ratio:var(--ar)}
+.media.ok img{object-fit:cover;object-position:center}
+@media (max-width:720px){.mediarow .media.ok{flex:none !important;width:100%}}
+.media.dim.ok::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.08);pointer-events:none}
+.media.ph{background:
+  repeating-linear-gradient(135deg, transparent 0 14px, rgba(255,255,255,.025) 14px 15px), var(--surface-2)}
+.media.ph::after{content:attr(data-label);position:absolute;left:16px;bottom:14px;font-family:var(--mono);font-size:11px;letter-spacing:.72px;text-transform:uppercase;color:var(--text-muted)}
+.media.ph::before{content:'';position:absolute;inset:0;background:linear-gradient(100deg, transparent 30%, rgba(255,255,255,.04) 50%, transparent 70%);
+  transform:translateX(-100%);animation:shimmer 2.4s var(--ease) infinite}
+@keyframes shimmer{to{transform:translateX(100%)}}
+
+/* ---------- Process ---------- */
+.steps{display:flex;gap:var(--space-8)}
+.step{flex:1;min-width:0;text-align:left;display:flex;flex-direction:column;gap:var(--space-8);padding:var(--space-16);border:1px solid var(--border);border-radius:var(--radius-stat);
+  position:relative;overflow:hidden;transition:border-color var(--d-std) var(--ease),background var(--d-std) var(--ease),transform var(--d-quick) var(--ease)}
+.step .n{font-family:var(--mono);font-size:12px;letter-spacing:.72px;color:var(--text-muted);transition:color var(--d-std)}
+.step .s{font-size:16px;line-height:1.5;color:var(--text-soft);transition:color var(--d-std)}
+.step:hover{border-color:#3a3a3a;transform:translateY(-2px)}
+.step:active{transform:scale(.97)}
+.step[aria-selected="true"]{background:var(--surface);border-color:var(--accent)}
+.step[aria-selected="true"] .n{color:var(--accent)}
+.step[aria-selected="true"] .s{color:var(--text)}
+.step .bar{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:0 50%}
+.step[aria-selected="true"] .bar{transform:scaleX(1);transition:transform 500ms var(--ease)}
+.detail{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:var(--space-32);min-height:344px;overflow:hidden;position:relative}
+.detail-inner{display:flex;flex-direction:column;gap:var(--space-24)}
+.detail-inner.out{animation:out 280ms var(--ease-in) forwards}
+.detail-inner.enter > *{opacity:0;animation:inSlide 700ms var(--ease) forwards;animation-delay:calc(var(--i) * 120ms)}
+@keyframes out{to{opacity:0;transform:translateX(calc(var(--dir,1) * -24px))}}
+@keyframes inSlide{from{opacity:0;transform:translateX(calc(var(--dir,1) * 32px))}to{opacity:1;transform:none}}
+.cols{display:flex;gap:var(--space-48)}
+.col{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--space-12)}
+.col ul{list-style:none}
+.col li::before{content:'•';margin-right:10px}
+.detail-inner{position:relative;z-index:1}
+.watermark{position:absolute;right:28px;bottom:-26px;z-index:0;font-weight:300;font-size:160px;line-height:1;letter-spacing:-6px;color:transparent;-webkit-text-stroke:1px #222;pointer-events:none;transition:transform 900ms var(--ease-pop)}
+
+/* ---------- Projects ---------- */
+.projects{display:flex;flex-direction:column;gap:var(--space-24)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-hero);padding:var(--space-32);display:flex;flex-direction:column;gap:var(--space-24);
+  position:relative;transition:border-color var(--d-std) var(--ease),transform var(--d-std) var(--ease),box-shadow var(--d-std) var(--ease)}
+.card::before{content:'';position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity var(--d-std);
+  background:radial-gradient(500px circle at var(--mx,50%) var(--my,50%), rgba(238,39,55,.10), transparent 45%)}
+.card:hover{border-color:#333;transform:translateY(-4px);box-shadow:0 24px 48px -24px rgba(0,0,0,.8)}
+.card:hover::before{opacity:1}
+.meta{display:flex;gap:var(--space-8);align-items:center}
+.meta .eyebrow{flex:1}
+.arrow{font-weight:500;font-size:16px;color:var(--text-muted);display:inline-block;transition:transform var(--d-std) var(--ease-pop),color var(--d-quick)}
+.card:hover .arrow{color:var(--accent);transform:translate(3px,-3px) rotate(0deg) scale(1.2)}
+.mediarow{display:flex;gap:var(--space-12)}
+.mediarow .media{flex:1;min-width:0;height:360px}
+.mediarow.tall .media{height:460px}
+.mediarow.tall .media:first-child{flex:0 0 53%}
+.card:hover .media.ok img{transform:scale(1.02)}
+.rule-h{height:1px;background:var(--divider)}
+.kpis{display:flex;gap:var(--space-48);align-items:flex-end}
+.kpi{display:flex;flex-direction:column;gap:var(--space-4)}
+.kpi b{font-weight:500;font-size:24px;line-height:1.25;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.compact-row{display:flex;gap:var(--space-24)}
+.compact{flex:1;min-width:0;padding:var(--space-24);gap:var(--space-16)}
+.compact .mediarow{gap:var(--space-8)}
+.compact .media{height:170px}
+
+/* ---------- Experience ---------- */
+.timeline{display:flex;flex-direction:column}
+.row{display:flex;gap:var(--space-32);align-items:flex-start;padding:var(--space-24) var(--space-16);border-top:1px solid var(--divider);position:relative;overflow:hidden;isolation:isolate}
+.row::before{content:'';position:absolute;inset:0;background:var(--surface);z-index:-1;transform:scaleX(0);transform-origin:0 50%;transition:transform 450ms var(--ease)}
+.row:hover::before{transform:scaleX(1)}
+.row .yrs{width:180px;flex-shrink:0}
+.row .role{width:320px;flex-shrink:0;display:flex;flex-direction:column;gap:var(--space-4);transition:transform var(--d-std) var(--ease-pop)}
+.row .role p:first-child{font-size:18px;line-height:1.6;color:var(--text-soft)}
+.row:hover .role{transform:translateX(8px)}
+.row .sum{flex:1;font-size:14px;line-height:1.5;color:var(--text-muted)}
+.row .arrow{font-size:14px}
+.row:hover .arrow{color:var(--accent);transform:rotate(45deg) scale(1.2)}
+.timeline.in .row{animation:rowIn 900ms var(--ease) both;animation-delay:calc(var(--i) * var(--stagger))}
+.timeline .row{opacity:0}
+@keyframes rowIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* ---------- About ---------- */
+.about-cols{display:flex;gap:var(--space-72)}
+.about-cols > div{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--space-24)}
+.edu{display:flex;flex-direction:column;gap:var(--space-16)}
+.edu p:first-child{font-size:16px;line-height:1.5}
+.group{display:flex;flex-direction:column;gap:var(--space-12)}
+.chips{display:flex;flex-wrap:wrap;gap:var(--space-8)}
+.chip{padding:var(--space-8) var(--space-12);border:1px solid var(--border);border-radius:var(--radius-tag);font-size:14px;line-height:1.5;color:var(--text-soft);
+  transition:border-color var(--d-quick),color var(--d-quick),background var(--d-quick)}
+.chip:hover{border-color:var(--accent);color:var(--text);animation:jelly 450ms var(--ease)}
+.chip.hop{animation:hop 500ms var(--ease-pop)}
+@keyframes jelly{30%{transform:scale(1.08,.92)}55%{transform:scale(.96,1.05)}80%{transform:scale(1.02,.99)}100%{transform:none}}
+@keyframes hop{30%{transform:translateY(-12px) rotate(-4deg)}60%{transform:translateY(2px) rotate(2deg)}100%{transform:none}}
+.chips.in .chip{animation:popin 650ms var(--ease-pop) both;animation-delay:calc(var(--i) * 55ms)}
+
+/* ---------- Values ---------- */
+.values-intro{display:flex;gap:var(--space-72)}
+.values-intro > *{flex:1}
+.values{display:flex;border-top:1px solid var(--divider);border-right:1px solid var(--divider);border-bottom:1px solid var(--divider)}
+.value{flex:1;min-width:0;border-left:1px solid var(--divider);padding:var(--space-48) var(--space-32);display:flex;flex-direction:column;gap:var(--space-24);position:relative;overflow:hidden;isolation:isolate}
+.value::before{content:'';position:absolute;left:var(--vx,50%);top:var(--vy,50%);width:10px;height:10px;border-radius:50%;background:var(--surface-2);z-index:-1;
+  transform:translate(-50%,-50%) scale(0);transition:transform 550ms var(--ease)}
+.value:hover::before{transform:translate(-50%,-50%) scale(90)}
+.value .icon{width:40px;height:40px;opacity:.5;transition:opacity var(--d-std),transform 500ms var(--ease-pop)}
+.value .icon img{width:40px;height:40px}
+.value:hover .icon{opacity:1;transform:translateY(-6px) rotate(-8deg)}
+.value .icon.empty{border:1.5px dashed var(--text-muted);border-radius:10px}
+.quote .w{display:inline-block;opacity:.18;transition:opacity 700ms var(--ease)}
+.quote .w.lit{opacity:1}
+
+/* ---------- Marquee ---------- */
+.contact{padding:var(--space-48) 0 var(--space-96)}
+.mrow{overflow:hidden;height:116px;position:relative}
+.track{display:flex;width:max-content;will-change:transform}
+.seg{display:flex;align-items:center;gap:56px;padding:12px 56px 16px 0;font-weight:300;font-size:clamp(48px,6.1vw,88px);line-height:1;letter-spacing:-.035em;white-space:nowrap;color:var(--text)}
+.mrow.two .seg{color:var(--text-soft)}
+.seg .d{width:16px;height:16px;border-radius:50%;background:var(--accent);flex-shrink:0;display:inline-block}
+.seg span:hover{color:var(--accent)}
+
+.footer{display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--divider);padding:var(--space-32) var(--gutter)}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1200px){
+  .hero-top{flex-direction:column}
+  .portrait{width:100%;min-height:520px}
+  .cols,.about-cols,.values-intro{flex-direction:column;gap:var(--space-32)}
+  .values{flex-wrap:wrap}.value{flex:1 1 50%}
+  .row{flex-wrap:wrap}.row .role{width:auto}.row .sum{flex:1 1 100%}
+  .mediarow.tall .media:first-child{flex:1}
+}
+@media (max-width:720px){
+  .links .link:not(.active){display:none}
+  .logo{width:auto}
+  .steps{overflow-x:auto;scrollbar-width:none}.step{min-width:120px}
+  .mediarow{flex-direction:column}.mediarow .media,.mediarow.tall .media{height:240px;flex:none}
+  .compact-row{flex-direction:column}
+  .value{flex:1 1 100%}
+  .kpis{flex-wrap:wrap;gap:var(--space-24)}
+  .watermark{display:none}
+}
+
+/* ---------- Reduced motion: keep feedback, drop travel ---------- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:1ms !important;animation-iteration-count:1 !important;transition-duration:1ms !important;scroll-behavior:auto !important}
+  .rv,.timeline .row,.name .ch,.portrait{opacity:1 !important;transform:none !important;clip-path:none !important}
+  .grain,.blob,.cursor{display:none}
+}
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="cursor" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <a class="logo" href="#hero" aria-label="VentureDive, back to top" data-hover><span class="slot-logo" data-src="assets/logo.png"></span></a>
+  <nav class="links" aria-label="Sections">
+    <span class="pill" aria-hidden="true"></span>
+    <a class="link active" href="#hero" data-hover><span class="dot"></span>about</a>
+    <a class="link" href="#process" data-hover><span class="dot"></span>process</a>
+    <a class="link" href="#work" data-hover><span class="dot"></span>work</a>
+    <a class="link" href="#experience" data-hover><span class="dot"></span>experience</a>
+  </nav>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="blob" aria-hidden="true"></div>
+    <div class="hero-top">
+      <div class="intro">
+        <p class="eyebrow typing" id="role" data-text="UX Designer at VentureDive">&nbsp;</p>
+        <h1 class="name" id="name" aria-label="Tooba Malik">Tooba Malik</h1>
+        <div class="body rv">
+          <p>Product designer making complex products feel simple. For 5+ years I’ve crafted research-driven experiences for web and mobile, pairing visual craft with systems thinking and business sense.</p>
+          <p>Building AI-assisted workflows that make designs code-ready from the start!</p>
+        </div>
+        <div class="avail rv"><span class="status" aria-hidden="true"><i></i></span>Open to collaboration</div>
+        <div class="tags pop" id="heroTags">
+          <span class="tag">EdTech</span><span class="tag">Mobility &amp; ground transport</span><span class="tag">Enterprise operations</span><span class="tag">Startups &amp; small business</span>
+        </div>
+      </div>
+      <div class="portrait" id="portrait">
+        <div class="media" data-src="assets/portrait.jpg" data-label="Portrait" data-alt="Portrait of Tooba Malik"></div>
+        <div class="glare"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section id="process" class="stack">
+    <div class="label rv"><p class="eyebrow">02 — how i work</p><div class="rule"></div></div>
+    <h2 class="h-section rv">The process</h2>
+    <div class="stack rv" style="gap:var(--space-16)">
+      <div class="steps" role="tablist" aria-label="Process stages" id="steps"></div>
+      <div class="detail" role="tabpanel" id="detail" aria-live="polite">
+        <span class="watermark" id="wm" aria-hidden="true">01</span>
+        <div class="detail-inner" id="detailInner"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section id="work" class="stack">
+    <div class="label rv"><p class="eyebrow">03 — Projects</p><div class="rule"></div></div>
+    <h2 class="h-section rv">Projects</h2>
+    <div class="projects">
+      <article class="card rv" data-tilt>
+        <div class="meta"><p class="eyebrow">luxury ground transportation • usa</p><span class="tag">Legacy revamp</span><span class="tag">Current</span><span class="arrow" aria-hidden="true">↗</span></div>
+        <h3 class="h-card" style="color:#f4f2ee">Revamping a legacy operations portal that runs executive ground transportation across 300+ markets.</h3>
+        <p class="body">The operations team at a global executive car service ran reservations, groups, vendors and incidents on a legacy platform that had outgrown its workflows. As part of a full rebuild, I redesigned the core modules on a new design system, auditing legacy flows against the PRD to decide what to keep, fix or rethink.</p>
+        <div class="mediarow">
+          <div class="media dim" data-src="assets/p1-desktop.webp" data-label="Portal · desktop" data-alt="Operations portal desktop screen"></div>
+          <div class="media dim" data-src="assets/p1-desktop2.webp" data-label="Portal · desktop 2" data-alt="Operations portal second desktop screen" style="border:0"></div>
+        </div>
+        <div class="rule-h"></div>
+        <div class="kpis">
+          <div class="kpi"><b data-count="18">18</b><span class="body-s">core modules rebuilt</span></div>
+          <div class="kpi"><b data-count="300" data-suffix="+">300+</b><span class="body-s">markets supported</span></div>
+          <div class="kpi"><b data-count="1" data-suffix="M+">1M+</b><span class="body-s">trips run on the platform</span></div>
+        </div>
+      </article>
+
+      <article class="card rv" data-tilt>
+        <div class="meta"><p class="eyebrow">chauffeur &amp; vendor app • ux audit</p><span class="tag">UX audit</span><span class="tag">Redesign pitch</span><span class="arrow" aria-hidden="true">↗</span></div>
+        <h3 class="h-card">Turning a UX audit into a design-system-led redesign of a chauffeur app.</h3>
+        <p class="body">Audited 16 core flows, and pitched a redesign built on a consistent design system that’s shaped to be more accessible for people using it on the road.</p>
+        <div class="mediarow tall">
+          <div class="media" data-src="assets/p2-mobile1.webp" data-label="App · mobile 1" data-alt="Chauffeur app screens"></div>
+          <div class="media" data-src="assets/p2-mobile2.webp" data-label="App · mobile 2" data-alt="Chauffeur app screen"></div>
+          <div class="media" data-src="assets/p2-mobile3.webp" data-label="App · mobile 3" data-alt="Chauffeur app screen"></div>
+        </div>
+        <div class="rule-h"></div>
+        <div class="kpis">
+          <div class="kpi"><b data-count="16">16</b><span class="body-s">core flows audited</span></div>
+          <div class="kpi"><b data-count="26">26</b><span class="body-s">usability findings</span></div>
+        </div>
+      </article>
+
+      <article class="card rv" data-tilt>
+        <div class="meta"><p class="eyebrow">edtech • knowledge platform</p><span class="tag">Desktop app</span><span class="tag">Research</span><span class="arrow" aria-hidden="true">↗</span></div>
+        <h3 class="h-card">Bringing lessons and assessments to classrooms with little or no internet.</h3>
+        <p class="body">Designed a lightweight offline desktop app that gives campus admins, teachers and learners lessons, games and clicker-based assessments, with patching and data sync to keep content current at scale.</p>
+        <div class="mediarow">
+          <div class="media" data-src="assets/p3-desktop.webp" data-label="Offline app · desktop" data-alt="Offline learning app screen"></div>
+          <div class="media" data-src="assets/p3-desktop2.webp" data-label="Offline app · desktop 2" data-alt="Offline learning app second screen"></div>
+        </div>
+        <div class="rule-h"></div>
+        <div class="kpis">
+          <div class="kpi"><b data-count="3">3</b><span class="body-s">user roles: admins, teachers, learners</span></div>
+          <div class="kpi"><b data-count="200" data-suffix="+">200+</b><span class="body-s">schools covered</span></div>
+        </div>
+      </article>
+
+      <div class="compact-row">
+        <article class="card compact rv" data-tilt>
+          <div class="meta"><p class="eyebrow">edtech • learning platform</p><span class="arrow" aria-hidden="true">↗</span></div>
+          <div class="mediarow"><div class="media" data-src="assets/p4-cover.webp" data-label="Rubric grading" data-alt="Rubric grading screens"></div></div>
+          <h3 class="h-small">Turning scattered feedback into consistent, transparent rubric grading.</h3>
+          <div class="tags"><span class="tag">UX Design</span><span class="tag">Web &amp; Mobile</span></div>
+          <p class="body-s">Designed rubric grading across web and mobile, moving from teacher-built rubrics to reusable CMS-led ones so grading stays consistent without extra setup.</p>
+        </article>
+        <article class="card compact rv" data-tilt>
+          <div class="meta"><p class="eyebrow">edtech • exam prep</p><span class="arrow" aria-hidden="true">↗</span></div>
+          <div class="mediarow"><div class="media" data-src="assets/p5-cover.webp" data-label="Exam prep" data-alt="Exam prep mobile flow and desktop screens"></div></div>
+          <h3 class="h-small">Designing mobile-first university entrance prep for Afghan learners.</h3>
+          <div class="tags"><span class="tag">Mobile-first</span><span class="tag">0→1 Product</span></div>
+          <p class="body-s">Led UX for a new exam-prep module in a national-curriculum LMS, with past papers, timed mock tests and bilingual content built for low connectivity.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE -->
+  <section id="experience" class="stack">
+    <div class="label rv"><p class="eyebrow">04 — the path so far</p><div class="rule"></div></div>
+    <h2 class="h-section rv">Experience</h2>
+    <div class="timeline" id="timeline">
+      <div class="row" style="--i:0"><p class="eyebrow yrs">2025 — now</p><div class="role"><p>UI/UX Designer</p><p class="eyebrow">venturedive</p></div><p class="sum">Enterprise operations portals, driver-facing apps and the design systems behind them.</p><span class="arrow" aria-hidden="true">↗</span></div>
+      <div class="row" style="--i:1"><p class="eyebrow yrs">Dec 2022 — 2025</p><div class="role"><p>Product Designer</p><p class="eyebrow">knowledge platform</p></div><p class="sum">Learning products for students, teachers and school leaders: LMS, offline learning and exam prep.</p><span class="arrow" aria-hidden="true">↗</span></div>
+      <div class="row" style="--i:2"><p class="eyebrow yrs">Jun 2023 — Jan 2024</p><div class="role"><p>UX/UI Designer · part-time</p><p class="eyebrow">surkush</p></div><p class="sum">Part-time product design alongside a full-time role.</p><span class="arrow" aria-hidden="true">↗</span></div>
+      <div class="row" style="--i:3"><p class="eyebrow yrs">Sep 2022 — Jan 2024</p><div class="role"><p>Freelance UX/UI Designer</p><p class="eyebrow">self-employed</p></div><p class="sum">Independent UX/UI projects for small businesses and startups.</p><span class="arrow" aria-hidden="true">↗</span></div>
+      <div class="row" style="--i:4"><p class="eyebrow yrs">Aug 2020 — Mar 2023</p><div class="role"><p>Co-founder &amp; Designer</p><p class="eyebrow">the aesthetes co.</p></div><p class="sum">Co-founded the studio and led its design work.</p><span class="arrow" aria-hidden="true">↗</span></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about" class="stack">
+    <div class="label rv"><p class="eyebrow">05 — about</p><div class="rule"></div></div>
+    <div class="about-cols">
+      <div>
+        <p class="h-card rv">A Product designer, drawn to useful products that make everyday life a little easier, designed with empathy and thought through as systems.</p>
+        <div class="group rv">
+          <div class="label"><p class="eyebrow">education</p><div class="rule"></div></div>
+          <div class="edu">
+            <div><p>UX/UI Design Fellowship</p><p class="body-s">Institute of Emerging Careers</p></div>
+            <div><p>BSc. (Hons.) Fashion Marketing &amp; Merchandising</p><p class="body-s">Asian Institute of Fashion &amp; Design</p></div>
+            <div><p>BA Geography, Economics &amp; Political Science</p><p class="body-s">University of Karachi</p></div>
+          </div>
+        </div>
+      </div>
+      <div style="gap:var(--space-32)">
+        <div class="group rv">
+          <div class="label"><p class="eyebrow">craft</p><div class="rule"></div></div>
+          <div class="chips">
+            <button class="chip">Product design strategy</button><button class="chip">UX research</button><button class="chip">Accessibility</button><button class="chip">Interaction design</button><button class="chip">Prototyping</button><button class="chip">Design system</button><button class="chip">Vibe coding</button><button class="chip">Communication design</button><button class="chip">Userflows</button>
+          </div>
+        </div>
+        <div class="group rv">
+          <div class="label"><p class="eyebrow">tools</p><div class="rule"></div></div>
+          <div class="chips">
+            <button class="chip">Figma (FigJam, Make)</button><button class="chip">Claude (Design, Cowork, Code)</button><button class="chip">Paper</button><button class="chip">Jira</button><button class="chip">GitHub</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VALUES -->
+  <section id="values" class="stack" style="gap:var(--space-48)">
+    <div class="label rv"><p class="eyebrow">06 — values</p><div class="rule"></div></div>
+    <div class="values-intro">
+      <h2 class="h-section rv">What I bring<br>to the team</h2>
+      <p class="body-l quote" id="quote">“Good design makes everyday life a little easier. It starts with the people using the product and the people building it, and it holds together when every piece works as one system.”</p>
+    </div>
+    <div class="values rv">
+      <div class="value"><div class="icon" data-src="assets/icon-people.png"></div><div class="group"><p class="h-card">People first</p><p class="body" style="color:var(--text-muted)">Real needs and behaviours shape every decision, so the product solves the problem people actually have.</p></div></div>
+      <div class="value"><div class="icon" data-src="assets/icon-heart.png"></div><div class="group"><p class="h-card">Design that feels right</p><p class="body" style="color:var(--text-muted)">Empathy guides the details, so an experience works well and feels good to use.</p></div></div>
+      <div class="value"><div class="icon" data-src="assets/icon-hierarchy.png"></div><div class="group"><p class="h-card">Systems over screens</p><p class="body" style="color:var(--text-muted)">Products are designed as connected systems and kept consistent across platforms.</p></div></div>
+      <div class="value"><div class="icon" data-src="assets/icon-agreement.png"></div><div class="group"><p class="h-card">Better together</p><p class="body" style="color:var(--text-muted)">Close work with analysts, developers and clients keeps decisions shared and handoffs smooth.</p></div></div>
+    </div>
+  </section>
+
+  <!-- CONTACT MARQUEE -->
+  <section class="contact" aria-label="Contact statement">
+    <div class="mrow one"><div class="track" id="t1"></div></div>
+    <div class="mrow two"><div class="track" id="t2"></div></div>
+  </section>
+</main>
+
+<footer class="footer eyebrow"><p>© 2026 tooba malik</p><p>ui/ux designer · venturedive</p></footer>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+  /* ---------- Images: load the design's assets; keep the on-system placeholder if one is missing ---------- */
+  $$('.media[data-src]').forEach((m) => {
+    const img = new Image();
+    img.alt = m.dataset.alt || '';
+    img.onload = () => { m.style.setProperty('--ar', (img.naturalWidth / img.naturalHeight).toFixed(4)); m.classList.add('ok'); m.classList.remove('ph'); };
+    img.onerror = () => { img.remove(); m.classList.add('ph'); m.setAttribute('role', 'img'); m.setAttribute('aria-label', m.dataset.alt || ''); };
+    m.appendChild(img); img.src = m.dataset.src;
+  });
+  $$('.icon[data-src]').forEach((d) => {
+    const img = new Image(); img.alt = '';
+    img.onerror = () => { img.remove(); d.classList.add('empty'); };
+    d.appendChild(img); img.src = d.dataset.src;
+  });
+  const ls = $('.slot-logo'), li = new Image();
+  li.alt = 'VentureDive';
+  li.onerror = () => { li.remove(); ls.innerHTML = '<span class="fallback">VentureDive</span>'; };
+  ls.appendChild(li); li.src = ls.dataset.src;
+
+  /* ---------- Hero: letters rise in, then boing on hover ---------- */
+  const name = $('#name'), txt = name.textContent; name.textContent = '';
+  [...txt].forEach((c, i) => {
+    const s = document.createElement('span');
+    s.setAttribute('aria-hidden', 'true');
+    if (c === ' ') { s.className = 'sp'; } else { s.className = 'ch'; s.textContent = c; s.style.setProperty('--i', i); }
+    s.addEventListener('mouseenter', () => { if (reduce || !s.classList.contains('ch')) return; s.classList.remove('boing'); void s.offsetWidth; s.classList.add('boing'); });
+    name.appendChild(s);
+  });
+  requestAnimationFrame(() => name.classList.add('go'));
+  setTimeout(() => $$('.ch', name).forEach((s) => { s.style.opacity = 1; s.style.transform = 'none'; }), 2600);
+
+  // Eyebrow types itself out
+  const role = $('#role'), rt = role.dataset.text;
+  if (reduce) { role.textContent = rt; role.classList.remove('typing'); }
+  else { let k = 0; const tick = () => { role.textContent = rt.slice(0, ++k); if (k < rt.length) setTimeout(tick, 60 + Math.random() * 50); else setTimeout(() => role.classList.remove('typing'), 1600); }; setTimeout(tick, 200); }
+
+  $$('#heroTags .tag').forEach((t, i) => t.style.setProperty('--i', i));
+  requestAnimationFrame(() => { $('#heroTags').classList.add('in'); $('#portrait').classList.add('in'); });
+
+  /* ---------- Portrait: 3D tilt + moving glare ---------- */
+  const por = $('#portrait');
+  if (!reduce) {
+    por.addEventListener('pointermove', (e) => {
+      const r = por.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      por.style.transition = 'transform 120ms linear';
+      por.style.transform = `perspective(900px) rotateY(${(x - .5) * 10}deg) rotateX(${(.5 - y) * 10}deg) scale(1.02)`;
+      por.style.setProperty('--gx', x * 100 + '%'); por.style.setProperty('--gy', y * 100 + '%');
+    });
+    por.addEventListener('pointerleave', () => { por.style.transition = ''; por.style.transform = ''; });
+  }
+
+  /* ---------- Reveal on scroll ---------- */
+  const io = new IntersectionObserver((es) => es.forEach((e) => {
+    if (!e.isIntersecting) return;
+    const el = e.target; el.classList.add('in'); $$('.label', el).forEach((l) => l.classList.add('in'));
+    if (el.matches('.kpis')) countUp(el);
+    if (el.matches('.chips')) $$('.chip', el).forEach((c, i) => c.style.setProperty('--i', i));
+    io.unobserve(el);
+  }), { threshold: .15, rootMargin: '0px 0px -8% 0px' });
+  $$('.rv, .label, .timeline, .kpis, .chips').forEach((el) => io.observe(el));
+
+  /* ---------- KPI counters ---------- */
+  function countUp(box) {
+    $$('b[data-count]', box).forEach((b) => {
+      const end = +b.dataset.count, suf = b.dataset.suffix || '';
+      if (reduce) return;
+      const start = Math.max(0, Math.floor(end * .4)), t0 = performance.now(), dur = 1800;
+      const step = (now) => { const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3); b.textContent = Math.round(start + (end - start) * e) + suf; if (p < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    });
+  }
+
+  /* ---------- Process tabs ---------- */
+  const STAGES = [
+    { n: '01', s: 'Understand', h: 'Context first, screens later.',
+      d: ['Join client calls and PRD reviews', 'Walk the live product end to end', 'Review competitors and patterns'],
+      ai: 'Condenses PRDs and call notes into a brief of goals, constraints and open questions. Mobbin surfaces reference patterns, and /⁠ux‑audit runs the first heuristic pass.',
+      ck: 'Every audit flag is confirmed in the real product. Open questions go back to the client before they count as findings.',
+      out: 'A shared brief and a ranked list of usability issues the team agrees on.' },
+    { n: '02', s: 'Define', h: 'One problem, framed the same way by everyone.',
+      d: ['Write problem statements and goals', 'Map user flows and site structure', 'Shape personas and requirements'],
+      ai: 'Drafts user stories, requirement lists and edge cases from research notes, and lays out first-pass information architecture and user flows.',
+      ck: 'Scope stays a human call. Drafts are rewritten against the PRD and walked through with the product analyst.',
+      out: 'Agreed flows, scope and requirements that design and development both build from.' },
+    { n: '03', s: 'Ideate', h: 'Wide exploration, on-system execution.',
+      d: ['Explore directions, commit to one', 'Design hi-fi on the design system', 'Own layout, interaction and visuals'],
+      ai: 'Spins up quick concepts in Figma Make and Claude Artifacts. Through the Figma MCP, assembles screens from existing components, swaps variants and drafts UX copy.',
+      ck: 'Every generated screen is checked against the design system and edited by hand. Anything off-system gets rebuilt.',
+      out: 'Clickable prototypes built from real components, ready for review.' },
+    { n: '04', s: 'Test', h: 'Reviewed early, refined often.',
+      d: ['Review designs with the analyst', 'Walk stakeholders through flows', 'Iterate until the flows hold up'],
+      ai: 'Re-runs designs for usability and accessibility gaps, and turns review notes into a list of concrete changes.',
+      ck: 'AI findings stay suggestions until confirmed on screen. Priorities are set together with the stakeholders.',
+      out: 'Validated flows, with a clear record of what changed and why.' },
+    { n: '05', s: 'Deliver', h: 'A handoff developers can build from without guessing.',
+      d: ['Annotate dev-ready Figma files', 'Write Jira tickets for every flow', 'Run design QA on built screens'],
+      ai: 'Drafts specs and Jira tickets straight from Figma, covering states, edge cases and copy, and maps components to code to cut the back-and-forth.',
+      ck: 'No ticket or spec reaches developers unreviewed. Built screens are compared against the design during QA.',
+      out: 'Clear tickets, buildable specs and shipped screens that match the design.' },
+  ];
+  const stepsEl = $('#steps'), inner = $('#detailInner'), wm = $('#wm');
+  let cur = 0, busy = false;
+  STAGES.forEach((st, i) => {
+    const b = document.createElement('button');
+    b.className = 'step'; b.setAttribute('role', 'tab'); b.id = 'tab-' + i; b.setAttribute('aria-controls', 'detail'); b.dataset.hover = '';
+    b.innerHTML = `<span class="n">${st.n}</span><span class="s">${st.s}</span><span class="bar"></span>`;
+    b.addEventListener('click', () => show(i));
+    b.addEventListener('keydown', (e) => {
+      const k = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (k) { e.preventDefault(); const j = (i + k + STAGES.length) % STAGES.length; $('#tab-' + j).focus(); show(j); }
+    });
+    stepsEl.appendChild(b);
+  });
+  const fill = (st) => `
+    <p class="h-card" style="--i:0">${st.h}</p>
+    <div class="cols" style="--i:1">
+      <div class="col"><p class="eyebrow">what i do</p><ul class="body">${st.d.map((x) => `<li>${x}</li>`).join('')}</ul></div>
+      <div class="col"><p class="eyebrow">where ai helps</p><p class="body">${st.ai}</p></div>
+      <div class="col"><p class="eyebrow">how i check it</p><p class="body">${st.ck}</p></div>
+    </div>
+    <div class="col" style="--i:2"><p class="eyebrow">what comes out</p><p class="body">${st.out}</p></div>`;
+  function select(i) {
+    $$('.step', stepsEl).forEach((b, j) => { b.setAttribute('aria-selected', j === i); b.tabIndex = j === i ? 0 : -1; });
+    $('#detail').setAttribute('aria-labelledby', 'tab-' + i);
+    wm.textContent = STAGES[i].n;
+  }
+  function show(i) {
+    if (i === cur || busy) return;
+    const dir = i > cur ? 1 : -1; cur = i; select(i);
+    inner.style.setProperty('--dir', dir);
+    if (reduce) { inner.innerHTML = fill(STAGES[i]); return; }
+    busy = true;
+    wm.style.transform = `translateY(-12px) rotate(${dir * -6}deg)`;
+    inner.classList.remove('enter'); inner.classList.add('out');
+    setTimeout(() => {
+      inner.innerHTML = fill(STAGES[i]); inner.classList.remove('out'); void inner.offsetWidth; inner.classList.add('enter');
+      wm.style.transform = ''; busy = false;
+    }, 280);
+  }
+  inner.innerHTML = fill(STAGES[0]); select(0);
+
+  /* ---------- Cards: pointer glow + gentle tilt ---------- */
+  $$('[data-tilt]').forEach((c) => {
+    c.addEventListener('pointermove', (e) => {
+      const r = c.getBoundingClientRect();
+      c.style.setProperty('--mx', e.clientX - r.left + 'px'); c.style.setProperty('--my', e.clientY - r.top + 'px');
+    });
+  });
+
+  /* ---------- Values: fill grows from where the pointer enters ---------- */
+  $$('.value').forEach((v) => v.addEventListener('pointerenter', (e) => {
+    const r = v.getBoundingClientRect();
+    v.style.setProperty('--vx', e.clientX - r.left + 'px'); v.style.setProperty('--vy', e.clientY - r.top + 'px');
+  }));
+
+  /* ---------- Quote lights up word by word as you scroll ---------- */
+  const q = $('#quote'); q.innerHTML = q.textContent.split(' ').map((w) => `<span class="w">${w}</span>`).join(' ');
+  const words = $$('.w', q);
+
+  /* ---------- Chips hop when clicked ---------- */
+  $$('.chip').forEach((c) => c.addEventListener('click', () => { c.classList.remove('hop'); void c.offsetWidth; c.classList.add('hop'); }));
+
+  /* ---------- Marquee: two rows, opposite directions, speed and skew follow scroll ---------- */
+  const seg = (t) => `<div class="seg"><span>${t}</span><i class="d" aria-hidden="true"></i></div>`;
+  const t1 = $('#t1'), t2 = $('#t2');
+  t1.innerHTML = seg('Bring me the complex.').repeat(8); t2.innerHTML = seg('I’ll make it ship-ready.').repeat(8);
+  $$('.seg', t1).slice(1).concat($$('.seg', t2).slice(1)).forEach((s) => s.setAttribute('aria-hidden', 'true'));
+  let x1 = 0, x2 = 0, vel = 0, lastY = scrollY, skew = 0;
+
+  /* ---------- Nav: sliding pill, scroll spy, always pinned ---------- */
+  const nav = $('#nav'), pill = $('.pill'), links = $$('.link');
+  const movePill = (a) => { pill.style.width = a.offsetWidth + 'px'; pill.style.transform = `translateX(${a.offsetLeft}px)`; };
+  const setActive = (id) => { links.forEach((l) => { const on = l.getAttribute('href') === '#' + id; l.classList.toggle('active', on); if (on) { l.setAttribute('aria-current', 'true'); movePill(l); } else l.removeAttribute('aria-current'); }); };
+  links.forEach((l) => l.addEventListener('mouseenter', () => movePill(l)));
+  $('.links').addEventListener('mouseleave', () => movePill($('.link.active')));
+  const spyIds = ['hero', 'process', 'work', 'experience'];
+  addEventListener('resize', () => movePill($('.link.active')));
+  document.fonts && document.fonts.ready.then(() => movePill($('.link.active')));
+  movePill($('.link.active'));
+
+  /* ---------- Cursor follower (lags behind, grows over things you can press) ---------- */
+  const cur$ = $('.cursor'); let cx = -50, cy = -50, tx = -50, ty = -50;
+  if (!reduce && matchMedia('(pointer:fine)').matches) {
+    addEventListener('pointermove', (e) => { tx = e.clientX; ty = e.clientY; cur$.classList.add('on'); });
+    document.addEventListener('pointerleave', () => cur$.classList.remove('on'));
+    document.addEventListener('pointerover', (e) => cur$.classList.toggle('big', !!e.target.closest('a, button, [data-hover]')));
+  }
+
+  /* ---------- One frame loop for scroll-linked + ambient motion ---------- */
+  const prog = $('.progress');
+  function frame() {
+    const y = scrollY, h = document.documentElement.scrollHeight - innerHeight;
+    prog.style.transform = `scaleX(${h > 0 ? y / h : 0})`;
+    const dy = y - lastY; lastY = y;
+    nav.classList.toggle('scrolled', y > 8);
+    let act = 'hero'; spyIds.forEach((id) => { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top < innerHeight * .4) act = id; });
+    if (!$('.link.active') || $('.link.active').getAttribute('href') !== '#' + act) setActive(act);
+    const qr = q.getBoundingClientRect(), qp = Math.min(1, Math.max(0, (innerHeight * .85 - qr.top) / (qr.height + innerHeight * .35)));
+    words.forEach((w, i) => w.classList.toggle('lit', reduce || i / words.length < qp));
+    if (!reduce) {
+      vel += (Math.abs(dy) - vel) * .1; skew += ((dy > 0 ? -1 : 1) * Math.min(vel, 40) * .15 - skew) * .1;
+      const sp = .6 + vel * .08, w1 = t1.scrollWidth / 2, w2 = t2.scrollWidth / 2;
+      x1 = (x1 - sp) % w1; x2 = (x2 + sp) % w2;
+      t1.style.transform = `translateX(${x1}px) skewX(${skew}deg)`;
+      t2.style.transform = `translateX(${x2 - w2}px) skewX(${skew}deg)`;
+      cx += (tx - cx) * .18; cy += (ty - cy) * .18;
+      cur$.style.transform = `translate(${cx}px, ${cy}px) translate(-50%,-50%)`;
+    }
+    requestAnimationFrame(frame);
+  }
+  if (reduce) { t2.style.transform = 'translateX(-30%)'; }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
