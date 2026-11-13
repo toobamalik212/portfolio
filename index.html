@@ -200,7 +200,7 @@ section{padding:var(--space-96) var(--gutter);position:relative}
 .compact .media{height:170px}
 
 /* ---------- Project stack: each card sticks, the next slides over it, the one beneath folds back ---------- */
-.projects.stacked{perspective:1600px;perspective-origin:50% 0}
+.stack-group{display:flex;flex-direction:column;gap:var(--space-24);perspective:1600px;perspective-origin:50% 0}
 .stack-item{position:sticky;transform-origin:50% 0;will-change:transform}
 .stack-item > .card,.stack-item > .compact-row{position:relative}
 .stack-item:not(:first-child) > .card,.stack-item:not(:first-child) .compact{box-shadow:0 -28px 56px -20px rgba(0,0,0,.9)}
@@ -643,9 +643,11 @@ section{padding:var(--space-96) var(--gutter);position:relative}
   if (!reduce) {
     proj.classList.add('stacked');
     // Only the three full-width cards stack; the compact row below scrolls normally.
-    [...proj.children].filter((el) => !el.classList.contains('compact-row')).forEach((el, i) => {
+    // The three full-width cards share one group: they stack while it's on screen, then leave together as a normal block.
+    const group = document.createElement('div'); group.className = 'stack-group'; proj.prepend(group);
+    [...proj.children].filter((el) => el !== group && !el.classList.contains('compact-row')).forEach((el, i) => {
       const w = document.createElement('div'); w.className = 'stack-item'; w.style.zIndex = i + 1;
-      el.before(w); w.appendChild(el);
+      group.appendChild(w); w.appendChild(el);
       const sh = document.createElement('div'); sh.className = 'fold-shade'; w.appendChild(sh);
       stack.push({ w, sh, top: 0, h: 0 });
     });
@@ -656,10 +658,8 @@ section{padding:var(--space-96) var(--gutter);position:relative}
       it.top = Math.min(96 + i * 14, innerHeight - it.h - 24);
       it.w.style.top = it.top + 'px';
     });
-    // The last card in the stack doesn't stick, so it scrolls away with the cards after it.
-    const unstickLast = () => { const l = stack[stack.length - 1]; if (l) { l.w.style.position = 'relative'; l.w.style.top = 'auto'; } };
-    layoutStack(); unstickLast(); addEventListener('resize', () => { layoutStack(); unstickLast(); });
-    if ('ResizeObserver' in window) { const ro = new ResizeObserver(() => { layoutStack(); unstickLast(); }); stack.forEach((it) => ro.observe(it.w)); }
+    layoutStack(); addEventListener('resize', layoutStack);
+    if ('ResizeObserver' in window) { const ro = new ResizeObserver(layoutStack); stack.forEach((it) => ro.observe(it.w)); }
   }
   function foldStack() {
     for (let i = 0; i < stack.length - 1; i++) {
