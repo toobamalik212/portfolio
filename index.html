@@ -642,7 +642,8 @@ section{padding:var(--space-96) var(--gutter);position:relative}
   const proj = $('.projects'), stack = [];
   if (!reduce) {
     proj.classList.add('stacked');
-    [...proj.children].forEach((el, i) => {
+    // Only the three full-width cards stack; the compact row below scrolls normally.
+    [...proj.children].filter((el) => !el.classList.contains('compact-row')).forEach((el, i) => {
       const w = document.createElement('div'); w.className = 'stack-item'; w.style.zIndex = i + 1;
       el.before(w); w.appendChild(el);
       const sh = document.createElement('div'); sh.className = 'fold-shade'; w.appendChild(sh);
@@ -655,8 +656,10 @@ section{padding:var(--space-96) var(--gutter);position:relative}
       it.top = Math.min(96 + i * 14, innerHeight - it.h - 24);
       it.w.style.top = it.top + 'px';
     });
-    layoutStack(); addEventListener('resize', layoutStack);
-    if ('ResizeObserver' in window) { const ro = new ResizeObserver(layoutStack); stack.forEach((it) => ro.observe(it.w)); }
+    // The last card in the stack doesn't stick, so it scrolls away with the cards after it.
+    const unstickLast = () => { const l = stack[stack.length - 1]; if (l) { l.w.style.position = 'relative'; l.w.style.top = 'auto'; } };
+    layoutStack(); unstickLast(); addEventListener('resize', () => { layoutStack(); unstickLast(); });
+    if ('ResizeObserver' in window) { const ro = new ResizeObserver(() => { layoutStack(); unstickLast(); }); stack.forEach((it) => ro.observe(it.w)); }
   }
   function foldStack() {
     for (let i = 0; i < stack.length - 1; i++) {
