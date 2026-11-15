@@ -100,8 +100,10 @@ section{padding:var(--space-96) var(--gutter);position:relative}
 .name .ch{display:inline-block;transform:translateY(110%) rotate(8deg);opacity:0;will-change:transform}
 .name.go .ch{animation:rise 1100ms var(--ease-pop) forwards;animation-delay:calc(var(--i) * 65ms + 200ms)}
 @keyframes rise{to{transform:none;opacity:1}}
-.name .ch.boing{animation:boing 600ms var(--ease) forwards}
-@keyframes boing{0%{transform:none}25%{transform:translateY(-18px) scale(1.08,.92);color:var(--accent)}55%{transform:translateY(3px) scale(.96,1.05)}80%{transform:translateY(-2px)}100%{transform:none;color:var(--text)}}
+/* Hover: a soft red gradient sweeps through the letter and its neighbours while it lifts a little */
+.name .ch{background:linear-gradient(100deg,var(--text) 35%,var(--accent) 48%,color-mix(in srgb, var(--accent) 45%, var(--text)) 54%,var(--text) 66%) 100% 0/320% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.name .ch.glow{animation:glow 1600ms var(--ease-soft) forwards;animation-delay:var(--gd,0ms)}
+@keyframes glow{0%{background-position:100% 0;transform:none}35%{transform:translateY(-6px)}100%{background-position:0 0;transform:none}}
 .name .sp{width:.28em}
 .eyebrow.typing::after{content:'_';color:var(--accent);animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
@@ -508,13 +510,19 @@ section{padding:var(--space-96) var(--gutter);position:relative}
   li.onerror = () => { li.remove(); ls.innerHTML = '<span class="fallback">VentureDive</span>'; };
   ls.appendChild(li); li.src = ls.dataset.src;
 
-  /* ---------- Hero: letters rise in, then boing on hover ---------- */
+  /* ---------- Hero: letters rise in, then a gradient sweep on hover ---------- */
   const name = $('#name'), txt = name.textContent; name.textContent = '';
   [...txt].forEach((c, i) => {
     const s = document.createElement('span');
     s.setAttribute('aria-hidden', 'true');
     if (c === ' ') { s.className = 'sp'; } else { s.className = 'ch'; s.textContent = c; s.style.setProperty('--i', i); }
-    s.addEventListener('mouseenter', () => { if (reduce || !s.classList.contains('ch')) return; s.classList.remove('boing'); void s.offsetWidth; s.classList.add('boing'); });
+    s.addEventListener('mouseenter', () => {
+      if (reduce || !s.classList.contains('ch')) return;
+      const all = [...name.children], at = all.indexOf(s);
+      all.forEach((c, j) => { const d = Math.abs(j - at); if (d > 2 || !c.classList.contains('ch') || c.classList.contains('glow')) return;
+        c.style.setProperty('--gd', d * 120 + 'ms'); c.classList.remove('glow'); void c.offsetWidth; c.classList.add('glow');
+        setTimeout(() => c.classList.remove('glow'), 1600 + d * 120); });
+    });
     name.appendChild(s);
   });
   requestAnimationFrame(() => name.classList.add('go'));
