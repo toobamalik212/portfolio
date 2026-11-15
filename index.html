@@ -100,10 +100,9 @@ section{padding:var(--space-96) var(--gutter);position:relative}
 .name .ch{display:inline-block;transform:translateY(110%) rotate(8deg);opacity:0;will-change:transform}
 .name.go .ch{animation:rise 1100ms var(--ease-pop) forwards;animation-delay:calc(var(--i) * 65ms + 200ms)}
 @keyframes rise{to{transform:none;opacity:1}}
-/* Hover: a soft red gradient sweeps through the letter and its neighbours while it lifts a little */
-.name .ch{background:linear-gradient(100deg,var(--text) 35%,var(--accent) 48%,color-mix(in srgb, var(--accent) 45%, var(--text)) 54%,var(--text) 66%) 100% 0/320% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+/* Hover: the letter and its neighbours lift a little in a gentle wave */
 .name .ch.glow{animation:glow 1600ms var(--ease-soft) forwards;animation-delay:var(--gd,0ms)}
-@keyframes glow{0%{background-position:100% 0;transform:none}35%{transform:translateY(-6px)}100%{background-position:0 0;transform:none}}
+@keyframes glow{0%{transform:none}35%{transform:translateY(-6px)}100%{transform:none}}
 .name .sp{width:.28em}
 .eyebrow.typing::after{content:'_';color:var(--accent);animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
@@ -510,7 +509,7 @@ section{padding:var(--space-96) var(--gutter);position:relative}
   li.onerror = () => { li.remove(); ls.innerHTML = '<span class="fallback">VentureDive</span>'; };
   ls.appendChild(li); li.src = ls.dataset.src;
 
-  /* ---------- Hero: letters rise in, then a gradient sweep on hover ---------- */
+  /* ---------- Hero: letters rise in, then a gentle lift on hover ---------- */
   const name = $('#name'), txt = name.textContent; name.textContent = '';
   [...txt].forEach((c, i) => {
     const s = document.createElement('span');
